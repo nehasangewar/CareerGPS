@@ -1,8 +1,8 @@
 package com.careergps.careergps.service;
 
 import com.careergps.careergps.dto.*;
-import com.careergps.careergps.entity.*;
-import com.careergps.careergps.repository.*;
+import com.careergps.careergps.entity.User;
+import com.careergps.careergps.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,134 +10,99 @@ import org.springframework.stereotype.Service;
 public class CareerService {
 
     @Autowired
-    private AssessmentResultRepository assessmentResultRepository;
-
-    @Autowired
     private UserRepository userRepository;
 
-    // ===============================
     // DIRECT GOAL
-    // ===============================
     public CareerResultResponse getDirectRoadmap(String goal, Long userId) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        CareerResultResponse response;
+        CareerResultResponse result;
 
         switch (goal.toUpperCase()) {
 
             case "SOFTWARE DEVELOPMENT":
-                response = new CareerResultResponse(
+                result = new CareerResultResponse(
                         "Software Development",
-                        "Backend systems and scalable apps.",
+                        "Focus on backend systems, APIs, and scalable applications.",
                         "Java → DSA → Backend → System Design"
                 );
                 break;
 
             case "WEB DEVELOPMENT":
-                response = new CareerResultResponse(
+                result = new CareerResultResponse(
                         "Web Development",
-                        "Frontend and full-stack development.",
+                        "Build responsive UI and full stack apps.",
                         "HTML → CSS → JS → React → Node"
                 );
                 break;
 
             default:
-                response = new CareerResultResponse(
+                result = new CareerResultResponse(
                         goal,
-                        "Custom roadmap.",
+                        "Custom roadmap",
                         "Roadmap coming soon."
                 );
         }
 
-        saveResult(user, response);
+        // 🔥 SAVE TO DB
+        user.setSelectedCareer(result.getCareerName());
+        user.setCareerDescription(result.getDescription());
+        user.setRoadmap(result.getRoadmap());
+        userRepository.save(user);
 
-        return response;
+        return result;
     }
 
-    // ===============================
-    // ASSESSMENT
-    // ===============================
-    public CareerResultResponse evaluateAndSave(Long userId, AssessmentRequest request) {
+    // ASSESSMENT LOGIC
+    public CareerResultResponse evaluateAssessment(Long userId, AssessmentRequest request) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        CareerResultResponse response = evaluateLogic(request);
+        CareerResultResponse result;
 
-        saveResult(user, response);
+        if (request.getTheoryPreference().equals("PRACTICAL")
+                && request.getWorkType().equals("CODE")) {
 
-        return response;
-    }
-
-    // ===============================
-    // CORE LOGIC
-    // ===============================
-    private CareerResultResponse evaluateLogic(AssessmentRequest request) {
-
-        if ("PRACTICAL".equals(request.getTheoryPreference())
-                && "CODE".equals(request.getWorkType())) {
-
-            if ("SECURITY".equals(request.getPracticalInterest())) {
-                return new CareerResultResponse(
-                        "Cyber Security",
-                        "Protect systems and find vulnerabilities.",
-                        "Networking → Ethical Hacking → Security Tools"
-                );
-            }
-
-            if ("BACKEND".equals(request.getDevPreference())) {
-                return new CareerResultResponse(
+            if (request.getDevPreference().equals("BACKEND")) {
+                result = new CareerResultResponse(
                         "Software Development",
-                        "Backend logic building.",
+                        "Backend system building.",
                         "Java → APIs → Databases"
                 );
-            }
-
-            return new CareerResultResponse(
-                    "Web Development",
-                    "Frontend and UI.",
-                    "HTML → CSS → React"
-            );
-        }
-
-        if ("THEORY".equals(request.getTheoryPreference())
-                && "NUMBERS".equals(request.getWorkType())) {
-
-            if ("INSIGHTS".equals(request.getDataInterest())) {
-                return new CareerResultResponse(
-                        "Data Analytics",
-                        "Business data insights.",
-                        "Excel → SQL → Python"
+            } else {
+                result = new CareerResultResponse(
+                        "Web Development",
+                        "Frontend development.",
+                        "HTML → CSS → JS → React"
                 );
             }
 
-            return new CareerResultResponse(
-                    "AI / ML",
-                    "Machine learning models.",
-                    "Python → ML → Deep Learning"
+        } else if (request.getTheoryPreference().equals("THEORY")
+                && request.getWorkType().equals("NUMBERS")) {
+
+            result = new CareerResultResponse(
+                    "Data Analytics",
+                    "Data insights and analysis.",
+                    "Excel → SQL → Python → Visualization"
+            );
+
+        } else {
+            result = new CareerResultResponse(
+                    "Cyber Security",
+                    "System protection & security.",
+                    "Networking → Ethical Hacking"
             );
         }
 
-        return new CareerResultResponse(
-                "General Tech",
-                "Start with fundamentals.",
-                "Programming basics"
-        );
-    }
+        // 🔥 SAVE TO USER
+        user.setSelectedCareer(result.getCareerName());
+        user.setCareerDescription(result.getDescription());
+        user.setRoadmap(result.getRoadmap());
+        userRepository.save(user);
 
-    // ===============================
-    // SAVE TO DATABASE
-    // ===============================
-    private void saveResult(User user, CareerResultResponse response) {
-
-        AssessmentResult result = new AssessmentResult();
-        result.setUser(user);
-        result.setCareerTitle(response.getTitle());
-        result.setDescription(response.getDescription());
-        result.setRoadmap(response.getRoadmap());
-
-        assessmentResultRepository.save(result);
+        return result;
     }
 }

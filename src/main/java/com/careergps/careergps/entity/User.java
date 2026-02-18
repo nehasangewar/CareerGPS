@@ -8,19 +8,26 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id;   // ✅ field name is id
 
     private String fullName;
-
-    @Column(unique = true)
     private String email;
-
     private String password;
 
-    // GETTERS AND SETTERS
+    private String selectedCareer;
+    private String careerDescription;
 
-    public Long getId() {
+    @Column(length = 2000)
+    private String roadmap;
+
+    // ===== Getters and Setters =====
+
+    public Long getId() {   // ✅ NOT getUserId()
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getFullName() {
@@ -45,5 +52,29 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getSelectedCareer() {
+        return selectedCareer;
+    }
+
+    public void setSelectedCareer(String selectedCareer) {
+        this.selectedCareer = selectedCareer;
+    }
+
+    public String getCareerDescription() {
+        return careerDescription;
+    }
+
+    public void setCareerDescription(String careerDescription) {
+        this.careerDescription = careerDescription;
+    }
+
+    public String getRoadmap() {
+        return roadmap;
+    }
+
+    public void setRoadmap(String roadmap) {
+        this.roadmap = roadmap;
     }
 }

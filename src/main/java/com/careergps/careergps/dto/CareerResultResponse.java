@@ -2,20 +2,21 @@ package com.careergps.careergps.dto;
 
 public class CareerResultResponse {
 
-    private String title;
+    private String careerName;
     private String description;
     private String roadmap;
 
     // Constructor
-    public CareerResultResponse(String title, String description, String roadmap) {
-        this.title = title;
+    public CareerResultResponse(String careerName, String description, String roadmap) {
+        this.careerName = careerName;
         this.description = description;
         this.roadmap = roadmap;
     }
 
-    // Getters
-    public String getTitle() {
-        return title;
+    // 🔥 VERY IMPORTANT GETTERS
+
+    public String getCareerName() {
+        return careerName;
     }
 
     public String getDescription() {
